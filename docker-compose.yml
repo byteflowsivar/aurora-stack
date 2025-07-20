@@ -1,0 +1,81 @@
+services:
+  keycloak_db:
+    image: postgres:16-alpine
+    container_name: keycloak-postgres
+    volumes:
+      - ./data/keycloak_db/postgresql:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${KC_POSTGRES_DB}
+      POSTGRES_USER: ${KC_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${KC_POSTGRES_PASSWORD}
+    networks:
+      - keycloak-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${KC_POSTGRES_USER} -d $${KC_POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3
+    container_name: keycloak
+    # command: start --optimized
+    command: start-dev
+    env_file:
+      - .env
+    environment:
+      KC_HOSTNAME: ${KC_HOSTNAME}
+      KC_HTTP_ENABLED: ${KC_HTTP_ENABLED}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak_db:5432/${KC_POSTGRES_DB}
+      KC_DB_USERNAME: ${KC_POSTGRES_USER}
+      KC_DB_PASSWORD: ${KC_POSTGRES_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      KC_PROXY: edge
+      KC_HOSTNAME_STRICT_HTTPS: false
+    ports:
+      - 8089:8080
+      - 8443:8443
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
+    networks:
+      - keycloak-network
+    restart: unless-stopped
+    volumes:
+      - ./packages/keycloak-themes:/opt/keycloak/themes  # Opcional para temas personalizados
+
+  aurora_db:
+    image: postgres:16-alpine
+    container_name: aurora-postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/aurora_db/postgresql:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${AURORA_POSTGRES_DB}
+      POSTGRES_USER: ${AURORA_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AURORA_POSTGRES_PASSWORD}
+    networks:
+      - aurora-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${AURORA_POSTGRES_USER} -d $${AURORA_POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+networks:
+  keycloak-network:
+    driver: bridge
+  aurora-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
