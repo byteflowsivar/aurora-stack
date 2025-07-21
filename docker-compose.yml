@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     container_name: keycloak-postgres
     volumes:
-      - ./data/keycloak_db/postgresql:/var/lib/postgresql/data
+      - keycloak_db_data:/var/lib/postgresql/data
     env_file:
       - .env
     environment:
@@ -55,7 +55,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./data/aurora_db/postgresql:/var/lib/postgresql/data
+      - aurora_db_data:/var/lib/postgresql/data
     env_file:
       - .env
     environment:
@@ -78,4 +78,7 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
+  keycloak_db_data:
+    driver: local
+  aurora_db_data:
+    driver: local
