@@ -1,0 +1,466 @@
+/* Aurora Theme - Keycloak Custom Styles */
+/* Self-contained CSS without external dependencies */
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* CSS Variables */
+:root {
+  --primary: #16056B;
+  --secondary: #FD9619;
+  --accent: #5696FA;
+  --light: #B4D7FE;
+  --background: #f8fafc;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --input: #f1f5f9;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Body and base layout */
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* Override Keycloak base styles */
+#kc-header,
+#kc-header-wrapper {
+  display: none !important;
+}
+
+.login-pf {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+}
+
+.login-pf body {
+  background: transparent !important;
+}
+
+.card-pf {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Main container */
+.kc-container {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Card styling */
+.kc-card {
+  background: var(--card);
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kc-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 50%, var(--secondary) 100%);
+}
+
+/* Header */
+.kc-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.kc-logo {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.kc-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.5rem 0;
+}
+
+.kc-subtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Form elements */
+.kc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.kc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kc-label {
+  font-weight: 500;
+  color: var(--text);
+  font-size: 0.875rem;
+  display: block;
+}
+
+/* Input styling */
+.kc-input,
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  border: 2px solid var(--border) !important;
+  border-radius: 0.5rem !important;
+  background: var(--input) !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.kc-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: var(--accent) !important;
+  background: var(--card) !important;
+  box-shadow: 0 0 0 3px rgba(86, 150, 250, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.kc-input:hover,
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover {
+  border-color: var(--light) !important;
+}
+
+/* Button styling */
+.kc-btn,
+input[type="submit"],
+button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  text-decoration: none;
+  border: none !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 44px;
+}
+
+.kc-btn:hover,
+input[type="submit"]:hover,
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.kc-btn:active,
+input[type="submit"]:active,
+button:active {
+  transform: translateY(0);
+}
+
+.kc-btn-primary,
+input[type="submit"] {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+  color: white !important;
+  width: 100%;
+}
+
+.kc-btn-primary:hover,
+input[type="submit"]:hover {
+  background: linear-gradient(135deg, #1a0a7a 0%, #4285f4 100%) !important;
+}
+
+.kc-btn-secondary {
+  background: transparent !important;
+  border: 2px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+.kc-btn-secondary:hover {
+  border-color: var(--accent) !important;
+  background: rgba(86, 150, 250, 0.05) !important;
+}
+
+.kc-btn-link {
+  background: none !important;
+  border: none !important;
+  color: var(--accent) !important;
+  padding: 0 !important;
+  font-size: 0.875rem !important;
+  text-decoration: none;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.kc-btn-link:hover {
+  text-decoration: underline !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Checkbox styling */
+.kc-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.kc-checkbox,
+input[type="checkbox"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  accent-color: var(--accent);
+}
+
+.kc-checkbox-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* Messages */
+.kc-message {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  border-left: 4px solid;
+}
+
+.kc-message-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #166534;
+  border-color: var(--success);
+}
+
+.kc-message-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #991b1b;
+  border-color: var(--error);
+}
+
+.kc-message-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+  border-color: var(--warning);
+}
+
+.kc-message-info {
+  background: rgba(86, 150, 250, 0.1);
+  color: var(--primary);
+  border-color: var(--accent);
+}
+
+/* Links section */
+.kc-links {
+  margin-top: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kc-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.kc-divider::before,
+.kc-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.kc-divider::before {
+  margin-right: 1rem;
+}
+
+.kc-divider::after {
+  margin-left: 1rem;
+}
+
+/* Social login */
+.kc-social {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.kc-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.kc-social-btn:hover {
+  border-color: var(--accent);
+  background: rgba(86, 150, 250, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Loading state */
+.kc-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.kc-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .kc-container {
+    padding: 0.5rem;
+  }
+  
+  .kc-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+  }
+  
+  .kc-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Accessibility */
+.kc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus visible for better accessibility */
+.kc-btn:focus-visible,
+.kc-input:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* Animation classes */
+.kc-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Override Keycloak default form styles */
+.login-pf-page .login-pf-brand {
+  display: none;
+}
+
+.login-pf-page .card-pf form {
+  background: transparent;
+}
+
+/* Ensure our custom styles take precedence */
+#kc-content,
+#kc-content-wrapper {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Hide default Keycloak header */
+#kc-header {
+  display: none !important;
+}
