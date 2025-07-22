@@ -1,0 +1,35 @@
+{
+  "name": "aurora-stack-github-tools",
+  "version": "1.0.0",
+  "description": "Herramientas automatizadas para configurar y gestionar el proyecto Aurora Stack en GitHub Projects",
+  "scripts": {
+    "validate": "node 00-validate-permissions.js",
+    "setup:all": "npm run validate && node 01-setup-project-fields.js && node 02-setup-repository-labels.js && node 03-create-sample-issues.js && node 04-setup-project-views.js",
+    "setup:fields": "node 01-setup-project-fields.js",
+    "setup:labels": "node 02-setup-repository-labels.js",
+    "setup:issues": "node 03-create-sample-issues.js",
+    "setup:views": "node 04-setup-project-views.js",
+    "check:prereqs": "gh --version && gh auth status",
+    "init": "cp .env.example .env && echo 'Configura el archivo .env con tus datos'"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  },
+  "keywords": [
+    "github",
+    "project-management",
+    "aurora-stack",
+    "automation",
+    "roadmap"
+  ],
+  "author": "Aurora Stack Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rex2002xp/aurora-stack.git",
+    "directory": "tools/github"
+  }
+}
