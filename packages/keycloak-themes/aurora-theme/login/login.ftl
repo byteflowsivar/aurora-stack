@@ -5,16 +5,33 @@
     <#elseif section = "form">
         <div id="kc-form">
             <div id="kc-form-wrapper">
-                <div class="kc-container">
-                    <div class="kc-card kc-fade-in">
-                        <!-- Header -->
-                        <div class="kc-header">
-                            <div class="kc-logo">
-                                A
-                            </div>
-                            <h1 class="kc-title">Aurora Stack</h1>
-                            <p class="kc-subtitle">Inicia sesión en tu cuenta</p>
+                <div class="kc-login-container">
+                    <!-- Left Column - Illustration -->
+                    <div class="kc-illustration-panel">
+                        <div class="kc-illustration">
+                            <svg class="kc-geometric-shape" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Main geometric shape -->
+                                <!-- Main shape -->
+                                <path d="M80 100 L200 80 L320 140 L280 260 L160 280 L120 200 Z" fill="#16056B" opacity="0.9"/>
+                                <!-- Secondary shapes -->
+                                <circle cx="300" cy="120" r="40" fill="#5696FA" opacity="0.7"/>
+                                <rect x="100" y="220" width="60" height="60" rx="15" fill="#5696FA" opacity="0.6" transform="rotate(15 130 250)"/>
+                                <path d="M240 200 L280 180 L300 220 L260 240 Z" fill="#FD9619" opacity="0.8"/>
+                            </svg>
                         </div>
+                    </div>
+                    
+                    <!-- Right Column - Login Form -->
+                    <div class="kc-form-panel">
+                        <div class="kc-card kc-fade-in">
+                            <!-- Header -->
+                            <div class="kc-header">
+                                <div class="kc-logo">
+                                    A
+                                </div>
+                                <h1 class="kc-title">Bienvenido</h1>
+                                <p class="kc-subtitle">A Club Deportivo MVP</p>
+                            </div>
 
                         <!-- Messages -->
                         <#if message?has_content && (message.type != 'warning' || !isAppInitiatedAction??)>
@@ -126,6 +143,7 @@
                                 </#list>
                             </div>
                         </#if>
+                        </div>
                     </div>
                 </div>
             </div>
