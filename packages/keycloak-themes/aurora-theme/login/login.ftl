@@ -26,11 +26,7 @@
                         <div class="kc-card kc-fade-in">
                             <!-- Header -->
                             <div class="kc-header">
-                                <div class="kc-logo">
-                                    A
-                                </div>
                                 <h1 class="kc-title">Bienvenido</h1>
-                                <p class="kc-subtitle">A Club Deportivo MVP</p>
                             </div>
 
                         <!-- Messages -->
