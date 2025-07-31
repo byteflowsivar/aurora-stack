@@ -2,14 +2,27 @@ package com.byteflowsivar.aurora.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(description = "Usuario para crear en Keycloak")
 public class User {
     
+    @Schema(description = "Nombre de usuario único", required = true, example = "usuario123")
     private final String username;
+    
+    @Schema(description = "Dirección de correo electrónico", required = true, example = "usuario@example.com")
     private final String email;
+    
+    @Schema(description = "Nombre del usuario", example = "Juan")
     private final String firstName;
+    
+    @Schema(description = "Apellido del usuario", example = "Pérez")
     private final String lastName;
+    
+    @Schema(description = "Contraseña del usuario", required = true, example = "password123")
     private final String password;
+    
+    @Schema(description = "Estado del usuario (activo/inactivo)", example = "true")
     private final boolean enabled;
 
     @JsonCreator

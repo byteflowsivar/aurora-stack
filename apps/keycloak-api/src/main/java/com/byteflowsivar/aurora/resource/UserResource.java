@@ -6,17 +6,66 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @Path("/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "User Management", description = "Operaciones de gestión de usuarios en Keycloak")
 public class UserResource {
 
     @Inject
     KeycloakUserService keycloakUserService;
 
     @POST
-    public Response createUser(User user) {
+    @Operation(
+        summary = "Crear nuevo usuario",
+        description = "Crea un nuevo usuario no administrador en el realm de Keycloak"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "201",
+            description = "Usuario creado exitosamente",
+            content = @Content(schema = @Schema(implementation = CreateUserResponse.class))
+        ),
+        @APIResponse(
+            responseCode = "400",
+            description = "Datos de validación incorrectos",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        ),
+        @APIResponse(
+            responseCode = "409",
+            description = "El usuario ya existe",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        ),
+        @APIResponse(
+            responseCode = "500",
+            description = "Error interno del servidor",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        )
+    })
+    public Response createUser(
+        @Schema(
+            description = "Datos del usuario a crear",
+            required = true,
+            example = """
+                {
+                  "username": "usuario123",
+                  "email": "usuario@example.com",
+                  "firstName": "Juan",
+                  "lastName": "Pérez",
+                  "password": "password123",
+                  "enabled": true
+                }
+                """
+        )
+        User user) {
         try {
             if (keycloakUserService.userExists(user.getUsername())) {
                 return Response.status(Response.Status.CONFLICT)
@@ -43,7 +92,29 @@ public class UserResource {
 
     @GET
     @Path("/{username}/exists")
-    public Response checkUserExists(@PathParam("username") String username) {
+    @Operation(
+        summary = "Verificar existencia de usuario",
+        description = "Verifica si un usuario existe en el realm de Keycloak"
+    )
+    @APIResponses({
+        @APIResponse(
+            responseCode = "200",
+            description = "Verificación completada",
+            content = @Content(schema = @Schema(implementation = UserExistsResponse.class))
+        ),
+        @APIResponse(
+            responseCode = "500",
+            description = "Error interno del servidor",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        )
+    })
+    public Response checkUserExists(
+        @Parameter(
+            description = "Nombre de usuario a verificar",
+            required = true,
+            example = "usuario123"
+        )
+        @PathParam("username") String username) {
         try {
             boolean exists = keycloakUserService.userExists(username);
             return Response.ok(new UserExistsResponse(username, exists)).build();
