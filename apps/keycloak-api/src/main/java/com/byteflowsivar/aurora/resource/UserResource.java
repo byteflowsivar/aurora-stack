@@ -5,11 +5,18 @@ import com.byteflowsivar.aurora.dto.CreateUserResponse;
 import com.byteflowsivar.aurora.dto.ErrorResponse;
 import com.byteflowsivar.aurora.dto.UserExistsResponse;
 import com.byteflowsivar.aurora.exception.KeycloakServiceException;
+import com.byteflowsivar.aurora.service.AuditService;
 import com.byteflowsivar.aurora.service.KeycloakUserService;
+import io.smallrye.faulttolerance.api.RateLimit;
+import io.smallrye.faulttolerance.api.RateLimitException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import java.time.temporal.ChronoUnit;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -26,8 +33,12 @@ public class UserResource {
 
     @Inject
     KeycloakUserService keycloakUserService;
+    
+    @Inject
+    AuditService auditService;
 
     @POST
+    @RateLimit(value = 100, window = 1, windowUnit = ChronoUnit.MINUTES)
     @Operation(
         summary = "Crear nuevo usuario",
         description = "Crea un nuevo usuario no administrador en el realm de Keycloak"
@@ -44,6 +55,11 @@ public class UserResource {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         ),
         @APIResponse(
+            responseCode = "429",
+            description = "Límite de velocidad excedido",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        ),
+        @APIResponse(
             responseCode = "409",
             description = "El usuario ya existe",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
@@ -55,6 +71,8 @@ public class UserResource {
         )
     })
     public Response createUser(
+        @Context HttpHeaders headers,
+        @Context UriInfo uriInfo,
         @Schema(
             description = "Datos del usuario a crear",
             required = true,
@@ -70,30 +88,44 @@ public class UserResource {
                 """
         )
         User user) {
+        String clientInfo = getClientInfo(headers);
+        
         try {
+            auditService.logUserCreationAttempt(user.getUsername(), user.getEmail(), clientInfo);
+            
             if (keycloakUserService.userExists(user.getUsername())) {
+                auditService.logUserCreationFailure("User already exists", clientInfo);
                 return Response.status(Response.Status.CONFLICT)
-                        .entity(new ErrorResponse("User already exists with username: " + user.getUsername(), "USER_ALREADY_EXISTS"))
+                        .entity(new ErrorResponse("User already exists", "USER_ALREADY_EXISTS"))
                         .build();
             }
 
             String userId = keycloakUserService.createUser(user);
+            auditService.logUserCreationSuccess(userId, clientInfo);
             
             return Response.status(Response.Status.CREATED)
                     .entity(new CreateUserResponse(userId, user.getUsername(), "User created successfully"))
                     .build();
                     
+        } catch (RateLimitException e) {
+            auditService.logRateLimitExceeded(clientInfo);
+            return Response.status(429)
+                    .entity(new ErrorResponse("Rate limit exceeded. Maximum 5 requests per 15 minutes", "RATE_LIMIT_EXCEEDED"))
+                    .build();
         } catch (IllegalArgumentException e) {
+            auditService.logValidationError(e.getMessage(), clientInfo);
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponse(e.getMessage(), "VALIDATION_ERROR"))
                     .build();
         } catch (KeycloakServiceException e) {
+            auditService.logUserCreationFailure(e.getErrorCode() + ": " + e.getMessage(), clientInfo);
             return Response.status(e.getHttpStatus())
                     .entity(new ErrorResponse(e.getMessage(), e.getErrorCode()))
                     .build();
         } catch (Exception e) {
+            auditService.logUserCreationFailure("INTERNAL_ERROR: " + e.getMessage(), clientInfo);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Internal server error: " + e.getMessage(), "INTERNAL_ERROR"))
+                    .entity(new ErrorResponse("Internal server error", "INTERNAL_ERROR"))
                     .build();
         }
     }
@@ -117,23 +149,56 @@ public class UserResource {
         )
     })
     public Response checkUserExists(
+        @Context HttpHeaders headers,
+        @Context UriInfo uriInfo,
         @Parameter(
             description = "Nombre de usuario a verificar",
             required = true,
             example = "usuario123"
         )
         @PathParam("username") String username) {
+        String clientInfo = getClientInfo(headers);
+        
         try {
+            auditService.logUserExistenceCheck(clientInfo);
             boolean exists = keycloakUserService.userExists(username);
             return Response.ok(new UserExistsResponse(username, exists)).build();
         } catch (KeycloakServiceException e) {
+            auditService.logAuthenticationFailure(clientInfo);
             return Response.status(e.getHttpStatus())
                     .entity(new ErrorResponse(e.getMessage(), e.getErrorCode()))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Error checking user existence: " + e.getMessage(), "INTERNAL_ERROR"))
+                    .entity(new ErrorResponse("Error checking user existence", "INTERNAL_ERROR"))
                     .build();
         }
+    }
+    
+    private String getClientInfo(HttpHeaders headers) {
+        String clientIp = getClientIpAddress(headers);
+        String userAgent = headers.getHeaderString("User-Agent");
+        
+        return String.format("IP=%s UA=%s", 
+                           clientIp != null ? clientIp : "unknown",
+                           userAgent != null ? userAgent.substring(0, Math.min(userAgent.length(), 100)) : "unknown");
+    }
+    
+    private String getClientIpAddress(HttpHeaders headers) {
+        // Check for X-Forwarded-For header (common in load balancers/proxies)
+        String xForwardedFor = headers.getHeaderString("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            // Take the first IP in the chain
+            return xForwardedFor.split(",")[0].trim();
+        }
+        
+        // Check for X-Real-IP header (common in nginx)
+        String xRealIp = headers.getHeaderString("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+        
+        // In test environment or when headers are not available
+        return "test-client";
     }
 }

@@ -60,7 +60,7 @@ public class UserResourceTest {
             .post("/users")
         .then()
             .statusCode(409)
-            .body("error", is("User already exists with username: existinguser"));
+            .body("error", is("User already exists"));
     }
 
     @Test

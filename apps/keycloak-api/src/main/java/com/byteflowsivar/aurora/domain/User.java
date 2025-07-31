@@ -33,11 +33,12 @@ public class User {
             @JsonProperty("lastName") String lastName,
             @JsonProperty("password") String password,
             @JsonProperty("enabled") Boolean enabled) {
-        this.username = username;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.password = password;
+        // Apply sanitization during construction
+        this.username = sanitizeInput(username);
+        this.email = sanitizeInput(email);
+        this.firstName = sanitizeInput(firstName);
+        this.lastName = sanitizeInput(lastName);
+        this.password = password; // Password is not sanitized to preserve special characters
         this.enabled = enabled != null ? enabled : true;
     }
 
@@ -69,24 +70,43 @@ public class User {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username is required");
         }
-        if (username.length() < 3 || username.length() > 50) {
+        
+        String sanitizedUsername = sanitizeInput(username);
+        if (sanitizedUsername.length() < 3 || sanitizedUsername.length() > 50) {
             throw new IllegalArgumentException("Username must be between 3 and 50 characters");
+        }
+        if (!isValidUsername(sanitizedUsername)) {
+            throw new IllegalArgumentException("Username contains invalid characters. Only alphanumeric, underscore, hyphen and dot are allowed");
         }
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email is required");
         }
-        if (!isValidEmail(email)) {
+        
+        String sanitizedEmail = sanitizeInput(email);
+        if (!isValidEmail(sanitizedEmail)) {
             throw new IllegalArgumentException("Invalid email format");
         }
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("Password is required");
         }
         validatePasswordComplexity(password);
-        if (firstName != null && firstName.length() > 50) {
-            throw new IllegalArgumentException("First name cannot exceed 50 characters");
+        if (firstName != null) {
+            String sanitizedFirstName = sanitizeInput(firstName);
+            if (sanitizedFirstName.length() > 50) {
+                throw new IllegalArgumentException("First name cannot exceed 50 characters");
+            }
+            if (!isValidName(sanitizedFirstName)) {
+                throw new IllegalArgumentException("First name contains invalid characters");
+            }
         }
-        if (lastName != null && lastName.length() > 50) {
-            throw new IllegalArgumentException("Last name cannot exceed 50 characters");
+        if (lastName != null) {
+            String sanitizedLastName = sanitizeInput(lastName);
+            if (sanitizedLastName.length() > 50) {
+                throw new IllegalArgumentException("Last name cannot exceed 50 characters");
+            }
+            if (!isValidName(sanitizedLastName)) {
+                throw new IllegalArgumentException("Last name contains invalid characters");
+            }
         }
     }
 
@@ -130,5 +150,43 @@ public class User {
             lowerPassword.contains("qwerty") || lowerPassword.contains("admin")) {
             throw new IllegalArgumentException("Password contains common weak patterns");
         }
+    }
+    
+    private String sanitizeInput(String input) {
+        if (input == null) return null;
+        
+        // Remove leading and trailing whitespace
+        String sanitized = input.trim();
+        
+        // Remove null bytes and control characters (except newline and tab for names)
+        sanitized = sanitized.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]", "");
+        
+        // Remove potentially dangerous HTML/XML characters
+        sanitized = sanitized.replace("<", "").replace(">", "").replace("&", "");
+        
+        // Remove SQL injection attempts
+        sanitized = sanitized.replaceAll("(?i)(select|insert|update|delete|drop|create|alter|exec|union|script)", "");
+        
+        return sanitized;
+    }
+    
+    private boolean isValidUsername(String username) {
+        if (username == null || username.isEmpty()) return false;
+        
+        // Username can only contain alphanumeric characters, underscore, hyphen, and dot
+        // Must start with alphanumeric character
+        return username.matches("^[a-zA-Z0-9][a-zA-Z0-9._-]*$") && 
+               !username.contains("..") && // No consecutive dots
+               !username.startsWith(".") && !username.endsWith("."); // No leading/trailing dots
+    }
+    
+    private boolean isValidName(String name) {
+        if (name == null || name.isEmpty()) return true; // Names are optional
+        
+        // Names can contain letters, spaces, hyphens, apostrophes, and dots
+        // Common in international names
+        return name.matches("^[a-zA-Z\\u00C0-\\u017F\\s'.-]+$") && 
+               name.length() >= 1 && 
+               !name.matches(".*[.'-]{2,}.*"); // No consecutive special characters
     }
 }
