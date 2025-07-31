@@ -99,7 +99,7 @@ Se debe implementar la arquitectura Domain-Driven Design (DDD) con una estructur
 **NO usar `admin-cli`** - Crear cliente específico para mejor seguridad:
 
 1. **Crear Realm**: `aurora-stack`
-2. **Crear Cliente**: `aurora-api-client`
+2. **Crear Cliente**: `aurora-keycloak-api-client`
    - Access Type: `confidential`
    - Service Accounts Enabled: `ON`
 3. **Asignar Roles Mínimos**:
