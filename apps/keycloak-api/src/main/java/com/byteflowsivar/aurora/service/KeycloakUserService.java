@@ -27,7 +27,7 @@ public class KeycloakUserService {
     String targetRealm;
 
     public String createUser(User user) {
-        LOG.infof("Creating user: %s in realm: %s", user.getUsername(), targetRealm);
+        LOG.infof("Creating user in realm: %s", targetRealm);
         
         try {
             user.validate();
@@ -39,18 +39,18 @@ public class KeycloakUserService {
 
             try (Response response = usersResource.create(userRepresentation)) {
                 int status = response.getStatus();
-                LOG.infof("User creation response status: %d for user: %s", status, user.getUsername());
+                LOG.infof("User creation response status: %d", status);
                 
                 if (status == 201) {
                     String userId = extractUserIdFromLocation(response.getLocation().toString());
                     LOG.infof("User created successfully with ID: %s", userId);
                     
-                    setUserPassword(usersResource, userId, user.getPassword());
-                    LOG.infof("Password set successfully for user: %s", user.getUsername());
+                    setUserPassword(usersResource, userId, user.getPasswordForAuthentication());
+                    LOG.infof("Password set successfully for user ID: %s", userId);
                     
                     return userId;
                 } else if (status == 409) {
-                    LOG.warnf("User already exists: %s", user.getUsername());
+                    LOG.warnf("User already exists in realm: %s", targetRealm);
                     throw new KeycloakServiceException(
                         "User already exists with username: " + user.getUsername(),
                         "USER_ALREADY_EXISTS", 
@@ -58,17 +58,17 @@ public class KeycloakUserService {
                     );
                 } else {
                     String errorMsg = "Failed to create user. HTTP Status: " + status;
-                    LOG.errorf(errorMsg + " for user: %s", user.getUsername());
+                    LOG.errorf(errorMsg + " in realm: %s", targetRealm);
                     throw new KeycloakServiceException(errorMsg, "USER_CREATION_FAILED", status);
                 }
             }
         } catch (IllegalArgumentException e) {
-            LOG.warnf("Validation error for user %s: %s", user.getUsername(), e.getMessage());
+            LOG.warnf("Validation error: %s", e.getMessage());
             throw e; // Re-throw validation errors as-is
         } catch (KeycloakServiceException e) {
             throw e; // Re-throw our custom exceptions
         } catch (Exception e) {
-            LOG.errorf(e, "Unexpected error creating user: %s", user.getUsername());
+            LOG.errorf(e, "Unexpected error creating user in realm: %s", targetRealm);
             throw new KeycloakServiceException(
                 "Unexpected error during user creation: " + e.getMessage(),
                 "INTERNAL_ERROR",
@@ -139,7 +139,7 @@ public class KeycloakUserService {
     }
 
     public boolean userExists(String username) {
-        LOG.infof("Checking if user exists: %s in realm: %s", username, targetRealm);
+        LOG.infof("Checking if user exists in realm: %s", targetRealm);
         
         try {
             RealmResource realmResource = getRealmResource();
@@ -148,10 +148,10 @@ public class KeycloakUserService {
             List<UserRepresentation> users = usersResource.search(username, true);
             boolean exists = !users.isEmpty();
             
-            LOG.infof("User existence check result for %s: %s", username, exists);
+            LOG.infof("User existence check completed: %s", exists);
             return exists;
         } catch (Exception e) {
-            LOG.errorf(e, "Error checking user existence for: %s", username);
+            LOG.errorf(e, "Error checking user existence in realm: %s", targetRealm);
             throw new KeycloakServiceException(
                 "Failed to check user existence",
                 "USER_EXISTENCE_CHECK_FAILED",

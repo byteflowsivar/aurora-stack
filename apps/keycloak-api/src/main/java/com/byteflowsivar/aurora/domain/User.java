@@ -57,7 +57,7 @@ public class User {
         return lastName;
     }
 
-    public String getPassword() {
+    public String getPasswordForAuthentication() {
         return password;
     }
 
@@ -81,9 +81,7 @@ public class User {
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("Password is required");
         }
-        if (password.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters long");
-        }
+        validatePasswordComplexity(password);
         if (firstName != null && firstName.length() > 50) {
             throw new IllegalArgumentException("First name cannot exceed 50 characters");
         }
@@ -98,5 +96,39 @@ public class User {
         // RFC 5322 compliant email regex (simplified but robust)
         String emailRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
         return email.matches(emailRegex) && email.length() <= 254; // RFC 5321 limit
+    }
+
+    private void validatePasswordComplexity(String password) {
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long");
+        }
+        if (password.length() > 128) {
+            throw new IllegalArgumentException("Password cannot exceed 128 characters");
+        }
+        
+        boolean hasUppercase = password.chars().anyMatch(Character::isUpperCase);
+        boolean hasLowercase = password.chars().anyMatch(Character::isLowerCase);
+        boolean hasDigit = password.chars().anyMatch(Character::isDigit);
+        boolean hasSpecialChar = password.chars().anyMatch(ch -> "!@#$%^&*()_+-=[]{}|;:,.<>?".indexOf(ch) >= 0);
+        
+        if (!hasUppercase) {
+            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+        }
+        if (!hasLowercase) {
+            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+        }
+        if (!hasDigit) {
+            throw new IllegalArgumentException("Password must contain at least one digit");
+        }
+        if (!hasSpecialChar) {
+            throw new IllegalArgumentException("Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)");
+        }
+        
+        // Check for common weak patterns
+        String lowerPassword = password.toLowerCase();
+        if (lowerPassword.contains("password") || lowerPassword.contains("123456") || 
+            lowerPassword.contains("qwerty") || lowerPassword.contains("admin")) {
+            throw new IllegalArgumentException("Password contains common weak patterns");
+        }
     }
 }
