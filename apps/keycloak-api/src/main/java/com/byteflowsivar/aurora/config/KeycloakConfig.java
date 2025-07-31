@@ -18,11 +18,8 @@ public class KeycloakConfig {
     @ConfigProperty(name = "quarkus.keycloak.admin-client.client-id")
     String clientId;
 
-    @ConfigProperty(name = "quarkus.keycloak.admin-client.username")
-    String username;
-
-    @ConfigProperty(name = "quarkus.keycloak.admin-client.password")
-    String password;
+    @ConfigProperty(name = "quarkus.keycloak.admin-client.client-secret")
+    String clientSecret;
 
     @Produces
     @ApplicationScoped
@@ -31,8 +28,8 @@ public class KeycloakConfig {
                 .serverUrl(serverUrl)
                 .realm(realm)
                 .clientId(clientId)
-                .username(username)
-                .password(password)
+                .clientSecret(clientSecret)
+                .grantType("client_credentials")
                 .build();
     }
 }
