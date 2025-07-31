@@ -69,18 +69,34 @@ public class User {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Username is required");
         }
+        if (username.length() < 3 || username.length() > 50) {
+            throw new IllegalArgumentException("Username must be between 3 and 50 characters");
+        }
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email is required");
-        }
-        if (password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("Password is required");
         }
         if (!isValidEmail(email)) {
             throw new IllegalArgumentException("Invalid email format");
         }
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long");
+        }
+        if (firstName != null && firstName.length() > 50) {
+            throw new IllegalArgumentException("First name cannot exceed 50 characters");
+        }
+        if (lastName != null && lastName.length() > 50) {
+            throw new IllegalArgumentException("Last name cannot exceed 50 characters");
+        }
     }
 
     private boolean isValidEmail(String email) {
-        return email != null && email.contains("@") && email.contains(".");
+        if (email == null) return false;
+        
+        // RFC 5322 compliant email regex (simplified but robust)
+        String emailRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
+        return email.matches(emailRegex) && email.length() <= 254; // RFC 5321 limit
     }
 }

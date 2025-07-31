@@ -1,6 +1,10 @@
 package com.byteflowsivar.aurora.resource;
 
 import com.byteflowsivar.aurora.domain.User;
+import com.byteflowsivar.aurora.dto.CreateUserResponse;
+import com.byteflowsivar.aurora.dto.ErrorResponse;
+import com.byteflowsivar.aurora.dto.UserExistsResponse;
+import com.byteflowsivar.aurora.exception.KeycloakServiceException;
 import com.byteflowsivar.aurora.service.KeycloakUserService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -69,7 +73,7 @@ public class UserResource {
         try {
             if (keycloakUserService.userExists(user.getUsername())) {
                 return Response.status(Response.Status.CONFLICT)
-                        .entity(new ErrorResponse("User already exists with username: " + user.getUsername()))
+                        .entity(new ErrorResponse("User already exists with username: " + user.getUsername(), "USER_ALREADY_EXISTS"))
                         .build();
             }
 
@@ -81,11 +85,15 @@ public class UserResource {
                     
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse(e.getMessage()))
+                    .entity(new ErrorResponse(e.getMessage(), "VALIDATION_ERROR"))
+                    .build();
+        } catch (KeycloakServiceException e) {
+            return Response.status(e.getHttpStatus())
+                    .entity(new ErrorResponse(e.getMessage(), e.getErrorCode()))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Internal server error: " + e.getMessage()))
+                    .entity(new ErrorResponse("Internal server error: " + e.getMessage(), "INTERNAL_ERROR"))
                     .build();
         }
     }
@@ -118,40 +126,14 @@ public class UserResource {
         try {
             boolean exists = keycloakUserService.userExists(username);
             return Response.ok(new UserExistsResponse(username, exists)).build();
+        } catch (KeycloakServiceException e) {
+            return Response.status(e.getHttpStatus())
+                    .entity(new ErrorResponse(e.getMessage(), e.getErrorCode()))
+                    .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Error checking user existence: " + e.getMessage()))
+                    .entity(new ErrorResponse("Error checking user existence: " + e.getMessage(), "INTERNAL_ERROR"))
                     .build();
-        }
-    }
-
-    public static class CreateUserResponse {
-        public final String userId;
-        public final String username;
-        public final String message;
-
-        public CreateUserResponse(String userId, String username, String message) {
-            this.userId = userId;
-            this.username = username;
-            this.message = message;
-        }
-    }
-
-    public static class UserExistsResponse {
-        public final String username;
-        public final boolean exists;
-
-        public UserExistsResponse(String username, boolean exists) {
-            this.username = username;
-            this.exists = exists;
-        }
-    }
-
-    public static class ErrorResponse {
-        public final String error;
-
-        public ErrorResponse(String error) {
-            this.error = error;
         }
     }
 }
