@@ -94,9 +94,9 @@ public class UserResource {
             auditService.logUserCreationAttempt(user.getUsername(), user.getEmail(), clientInfo);
             
             if (keycloakUserService.userExists(user.getUsername())) {
-                auditService.logUserCreationFailure("User already exists", clientInfo);
+                auditService.logUserCreationFailure("El usuario ya existe", clientInfo);
                 return Response.status(Response.Status.CONFLICT)
-                        .entity(new ErrorResponse("User already exists", "USER_ALREADY_EXISTS"))
+                        .entity(new ErrorResponse("El usuario ya existe", "USER_ALREADY_EXISTS"))
                         .build();
             }
 
@@ -104,13 +104,13 @@ public class UserResource {
             auditService.logUserCreationSuccess(userId, clientInfo);
             
             return Response.status(Response.Status.CREATED)
-                    .entity(new CreateUserResponse(userId, user.getUsername(), "User created successfully"))
+                    .entity(new CreateUserResponse(userId, user.getUsername(), "Usuario creado exitosamente"))
                     .build();
                     
         } catch (RateLimitException e) {
             auditService.logRateLimitExceeded(clientInfo);
             return Response.status(429)
-                    .entity(new ErrorResponse("Rate limit exceeded. Maximum 5 requests per 15 minutes", "RATE_LIMIT_EXCEEDED"))
+                    .entity(new ErrorResponse("Límite de velocidad excedido. Máximo 100 solicitudes por minuto", "RATE_LIMIT_EXCEEDED"))
                     .build();
         } catch (IllegalArgumentException e) {
             auditService.logValidationError(e.getMessage(), clientInfo);
@@ -125,7 +125,7 @@ public class UserResource {
         } catch (Exception e) {
             auditService.logUserCreationFailure("INTERNAL_ERROR: " + e.getMessage(), clientInfo);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Internal server error", "INTERNAL_ERROR"))
+                    .entity(new ErrorResponse("Error interno del servidor", "INTERNAL_ERROR"))
                     .build();
         }
     }
@@ -170,7 +170,7 @@ public class UserResource {
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Error checking user existence", "INTERNAL_ERROR"))
+                    .entity(new ErrorResponse("Error al verificar existencia del usuario", "INTERNAL_ERROR"))
                     .build();
         }
     }

@@ -68,44 +68,44 @@ public class User {
 
     public void validate() {
         if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username is required");
+            throw new IllegalArgumentException("El nombre de usuario es requerido");
         }
         
         String sanitizedUsername = sanitizeInput(username);
         if (sanitizedUsername.length() < 3 || sanitizedUsername.length() > 50) {
-            throw new IllegalArgumentException("Username must be between 3 and 50 characters");
+            throw new IllegalArgumentException("El nombre de usuario debe tener entre 3 y 50 caracteres");
         }
         if (!isValidUsername(sanitizedUsername)) {
-            throw new IllegalArgumentException("Username contains invalid characters. Only alphanumeric, underscore, hyphen and dot are allowed");
+            throw new IllegalArgumentException("El nombre de usuario contiene caracteres inválidos. Solo se permiten alfanuméricos, guión bajo, guión y punto");
         }
         if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email is required");
+            throw new IllegalArgumentException("El correo electrónico es requerido");
         }
         
         String sanitizedEmail = sanitizeInput(email);
         if (!isValidEmail(sanitizedEmail)) {
-            throw new IllegalArgumentException("Invalid email format");
+            throw new IllegalArgumentException("Formato de correo electrónico inválido");
         }
         if (password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("Password is required");
+            throw new IllegalArgumentException("La contraseña es requerida");
         }
         validatePasswordComplexity(password);
         if (firstName != null) {
             String sanitizedFirstName = sanitizeInput(firstName);
             if (sanitizedFirstName.length() > 50) {
-                throw new IllegalArgumentException("First name cannot exceed 50 characters");
+                throw new IllegalArgumentException("El nombre no puede exceder 50 caracteres");
             }
             if (!isValidName(sanitizedFirstName)) {
-                throw new IllegalArgumentException("First name contains invalid characters");
+                throw new IllegalArgumentException("El nombre contiene caracteres inválidos");
             }
         }
         if (lastName != null) {
             String sanitizedLastName = sanitizeInput(lastName);
             if (sanitizedLastName.length() > 50) {
-                throw new IllegalArgumentException("Last name cannot exceed 50 characters");
+                throw new IllegalArgumentException("El apellido no puede exceder 50 caracteres");
             }
             if (!isValidName(sanitizedLastName)) {
-                throw new IllegalArgumentException("Last name contains invalid characters");
+                throw new IllegalArgumentException("El apellido contiene caracteres inválidos");
             }
         }
     }
@@ -120,10 +120,10 @@ public class User {
 
     private void validatePasswordComplexity(String password) {
         if (password.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters long");
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
         }
         if (password.length() > 128) {
-            throw new IllegalArgumentException("Password cannot exceed 128 characters");
+            throw new IllegalArgumentException("La contraseña no puede exceder 128 caracteres");
         }
         
         boolean hasUppercase = password.chars().anyMatch(Character::isUpperCase);
@@ -132,23 +132,24 @@ public class User {
         boolean hasSpecialChar = password.chars().anyMatch(ch -> "!@#$%^&*()_+-=[]{}|;:,.<>?".indexOf(ch) >= 0);
         
         if (!hasUppercase) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+            throw new IllegalArgumentException("La contraseña debe contener al menos una letra mayúscula");
         }
         if (!hasLowercase) {
-            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+            throw new IllegalArgumentException("La contraseña debe contener al menos una letra minúscula");
         }
         if (!hasDigit) {
-            throw new IllegalArgumentException("Password must contain at least one digit");
+            throw new IllegalArgumentException("La contraseña debe contener al menos un dígito");
         }
         if (!hasSpecialChar) {
-            throw new IllegalArgumentException("Password must contain at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?)");
+            throw new IllegalArgumentException("La contraseña debe contener al menos un carácter especial (!@#$%^&*()_+-=[]{}|;:,.<>?)");
         }
         
         // Check for common weak patterns
         String lowerPassword = password.toLowerCase();
         if (lowerPassword.contains("password") || lowerPassword.contains("123456") || 
-            lowerPassword.contains("qwerty") || lowerPassword.contains("admin")) {
-            throw new IllegalArgumentException("Password contains common weak patterns");
+            lowerPassword.contains("qwerty") || lowerPassword.contains("admin") ||
+            lowerPassword.contains("contraseña") || lowerPassword.contains("clave")) {
+            throw new IllegalArgumentException("La contraseña contiene patrones débiles comunes");
         }
     }
     

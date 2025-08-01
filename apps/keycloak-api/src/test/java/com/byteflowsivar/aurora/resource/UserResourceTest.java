@@ -39,7 +39,7 @@ public class UserResourceTest {
             .statusCode(201)
             .body("userId", is("user-123"))
             .body("username", is("testuser"))
-            .body("message", is("User created successfully"));
+            .body("message", is("Usuario creado exitosamente"));
     }
 
     @Test
@@ -60,7 +60,7 @@ public class UserResourceTest {
             .post("/users")
         .then()
             .statusCode(409)
-            .body("error", is("User already exists"));
+            .body("error", is("El usuario ya existe"));
     }
 
     @Test

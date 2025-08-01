@@ -27,7 +27,7 @@ public class KeycloakUserService {
     String targetRealm;
 
     public String createUser(User user) {
-        LOG.infof("Creating user in realm: %s", targetRealm);
+        LOG.infof("Creando usuario en realm: %s", targetRealm);
         
         try {
             user.validate();
@@ -39,38 +39,38 @@ public class KeycloakUserService {
 
             try (Response response = usersResource.create(userRepresentation)) {
                 int status = response.getStatus();
-                LOG.infof("User creation response status: %d", status);
+                LOG.infof("Estado de respuesta de creación de usuario: %d", status);
                 
                 if (status == 201) {
                     String userId = extractUserIdFromLocation(response.getLocation().toString());
-                    LOG.infof("User created successfully with ID: %s", userId);
+                    LOG.infof("Usuario creado exitosamente con ID: %s", userId);
                     
                     setUserPassword(usersResource, userId, user.getPasswordForAuthentication());
-                    LOG.infof("Password set successfully for user ID: %s", userId);
+                    LOG.infof("Contraseña establecida exitosamente para usuario ID: %s", userId);
                     
                     return userId;
                 } else if (status == 409) {
-                    LOG.warnf("User already exists in realm: %s", targetRealm);
+                    LOG.warnf("El usuario ya existe en realm: %s", targetRealm);
                     throw new KeycloakServiceException(
-                        "User already exists with username: " + user.getUsername(),
+                        "El usuario ya existe",
                         "USER_ALREADY_EXISTS", 
                         409
                     );
                 } else {
-                    String errorMsg = "Failed to create user. HTTP Status: " + status;
-                    LOG.errorf(errorMsg + " in realm: %s", targetRealm);
+                    String errorMsg = "Error al crear usuario. Estado HTTP: " + status;
+                    LOG.errorf(errorMsg + " en realm: %s", targetRealm);
                     throw new KeycloakServiceException(errorMsg, "USER_CREATION_FAILED", status);
                 }
             }
         } catch (IllegalArgumentException e) {
-            LOG.warnf("Validation error: %s", e.getMessage());
+            LOG.warnf("Error de validación: %s", e.getMessage());
             throw e; // Re-throw validation errors as-is
         } catch (KeycloakServiceException e) {
             throw e; // Re-throw our custom exceptions
         } catch (Exception e) {
-            LOG.errorf(e, "Unexpected error creating user in realm: %s", targetRealm);
+            LOG.errorf(e, "Error inesperado creando usuario en realm: %s", targetRealm);
             throw new KeycloakServiceException(
-                "Unexpected error during user creation: " + e.getMessage(),
+                "Error inesperado durante la creación del usuario: " + e.getMessage(),
                 "INTERNAL_ERROR",
                 500,
                 e
@@ -98,9 +98,9 @@ public class KeycloakUserService {
 
             usersResource.get(userId).resetPassword(credential);
         } catch (Exception e) {
-            LOG.errorf(e, "Failed to set password for user ID: %s", userId);
+            LOG.errorf(e, "Error al establecer contraseña para usuario ID: %s", userId);
             throw new KeycloakServiceException(
-                "Failed to set user password",
+                "Error al establecer la contraseña del usuario",
                 "PASSWORD_SET_FAILED",
                 500,
                 e
@@ -111,7 +111,7 @@ public class KeycloakUserService {
     private String extractUserIdFromLocation(String location) {
         if (location == null || location.isEmpty()) {
             throw new KeycloakServiceException(
-                "Invalid location header from Keycloak",
+                "Encabezado de ubicación inválido de Keycloak",
                 "INVALID_LOCATION_HEADER",
                 500
             );
@@ -121,16 +121,16 @@ public class KeycloakUserService {
             String userId = parts[parts.length - 1];
             if (userId.isEmpty()) {
                 throw new KeycloakServiceException(
-                    "Could not extract user ID from location: " + location,
+                    "No se pudo extraer el ID del usuario de la ubicación: " + location,
                     "USER_ID_EXTRACTION_FAILED",
                     500
                 );
             }
             return userId;
         } catch (Exception e) {
-            LOG.errorf(e, "Error extracting user ID from location: %s", location);
+            LOG.errorf(e, "Error extrayendo ID de usuario de la ubicación: %s", location);
             throw new KeycloakServiceException(
-                "Failed to extract user ID from location",
+                "Error al extraer el ID del usuario de la ubicación",
                 "USER_ID_EXTRACTION_FAILED",
                 500,
                 e
@@ -139,7 +139,7 @@ public class KeycloakUserService {
     }
 
     public boolean userExists(String username) {
-        LOG.infof("Checking if user exists in realm: %s", targetRealm);
+        LOG.infof("Verificando si el usuario existe en realm: %s", targetRealm);
         
         try {
             RealmResource realmResource = getRealmResource();
@@ -148,12 +148,12 @@ public class KeycloakUserService {
             List<UserRepresentation> users = usersResource.search(username, true);
             boolean exists = !users.isEmpty();
             
-            LOG.infof("User existence check completed: %s", exists);
+            LOG.infof("Verificación de existencia de usuario completada: %s", exists);
             return exists;
         } catch (Exception e) {
-            LOG.errorf(e, "Error checking user existence in realm: %s", targetRealm);
+            LOG.errorf(e, "Error verificando existencia de usuario en realm: %s", targetRealm);
             throw new KeycloakServiceException(
-                "Failed to check user existence",
+                "Error al verificar la existencia del usuario",
                 "USER_EXISTENCE_CHECK_FAILED",
                 500,
                 e
@@ -165,9 +165,9 @@ public class KeycloakUserService {
         try {
             return keycloak.realm(targetRealm);
         } catch (Exception e) {
-            LOG.errorf(e, "Failed to access realm: %s", targetRealm);
+            LOG.errorf(e, "Error al acceder al realm: %s", targetRealm);
             throw new KeycloakServiceException(
-                "Failed to access Keycloak realm: " + targetRealm,
+                "Error al acceder al realm de Keycloak: " + targetRealm,
                 "REALM_ACCESS_FAILED",
                 503,
                 e
