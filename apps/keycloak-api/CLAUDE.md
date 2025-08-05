@@ -69,6 +69,30 @@ Se debe implementar la arquitectura Domain-Driven Design (DDD) con una estructur
   - **resource**: Endpoints REST (JAX-RS)
   - **security**: Configuración de seguridad y autenticación
 
+## Principios de Diseño
+- **Domain-Driven Design (DDD)**: Separación clara de dominios, servicios y recursos
+- **Single Responsibility Principle (SRP)**: Cada clase debe tener una única responsabilidad
+- **Open/Closed Principle (OCP)**: Clases abiertas a extensión pero cerradas a modificación
+- **Dependency Injection**: Uso de CDI para inyección de dependencias
+- **Configuración Externa**: Uso de `application.properties` y variables de entorno para configuración
+- **Validación de Datos**: Uso de anotaciones de validación en entidades y DTOs
+- **Manejo de Errores**: Uso de excepciones específicas y manejo de errores HTTP en endpoints REST
+- **Seguridad**: Uso de un cliente Keycloak dedicado con permisos mínimos para operaciones de usuario
+- **Revelar la intención** en tu código para que sea claro y expresivo.
+- **Minimizar la complejidad** manteniendo solo lo necesario.
+- **Eliminar duplicidades** que generan bugs y sobrecostes.
+- **Asegurar el correcto funcionamiento** con tests fiables y mantenibles.
+
+
+## Reglas de Codificación
+
+- **Nombres de Clases**: CamelCase, descriptivos (ej. `KeycloakUserService`)
+- **Nombres de Métodos**: Verbos en camelCase (ej. `createUser`)
+- **Nombres de Variables**: Descriptivos, camelCase (ej. `userService`)
+- **Comentarios**: Javadoc para clases y métodos públicos, comentarios en línea para lógica compleja
+- **Manejo de Errores**: Excepciones específicas, manejo de errores HTTP en endpoints REST
+- **Validaciones**: Uso de anotaciones de validación (ej. `@NotNull`, `@Email`) en entidades y DTOs
+
 ## Estado Actual
 
 **✅ Proyecto Implementado**: La integración con Keycloak está completamente funcional.
